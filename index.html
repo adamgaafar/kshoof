@@ -1198,6 +1198,9 @@
                     renderMediaItems();
                     saveMediaData();
                 };
+                reader.onerror = function() {
+                    alert('حدث خطأ أثناء تحميل الملف: ' + file.name);
+                };
                 reader.readAsDataURL(file);
             });
         }
@@ -1370,21 +1373,8 @@
 
         function openPDFInNewTab(index) {
             const pdf = pdfItems[index];
-            if (pdf.isLocal) {
-                const dataUrl = pdf.src;
-                const base64String = dataUrl.split(',')[1];
-                const byteCharacters = atob(base64String);
-                const byteNumbers = new Array(byteCharacters.length);
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-                const byteArray = new Uint8Array(byteNumbers);
-                const blob = new Blob([byteArray], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-            } else {
-                window.open(pdf.src, '_blank');
-            }
+            const url = pdf.src;
+            window.open(url, '_blank');
         }
 
         function updatePDFDescription(index, description) {
