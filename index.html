@@ -257,8 +257,6 @@
 <body>
     <div class="container">
         <h2>كشف المتابعة اليومي</h2>
-
-        <!-- تبويبات -->
         <div class="tab">
             <button class="tablinks kashf-tab active" onclick="openTab(event, 'kashf')">الكشف</button>
             <button class="tablinks participation-tab" onclick="openTab(event, 'participation')">المشاركة والواجبات</button>
@@ -269,8 +267,6 @@
             <button class="tablinks media-tab" onclick="openTab(event, 'media')">الفيديو والصور</button>
             <button class="tablinks pdf-tab" onclick="openTab(event, 'pdf')">ملفات PDF</button>
         </div>
-
-        <!-- تبويب الكشف -->
         <div id="kashf" class="tabcontent" style="display: block;">
             <div class="control-section">
                 <input type="text" id="studentName" placeholder="اسم الطالب" onkeypress="if(event.key === 'Enter') addStudent()">
@@ -295,6 +291,7 @@
                 <select id="filterKashfSection" onchange="filterKashfTable()">
                     <option value="">جميع الفصول</option>
                 </select>
+                <input type="text" id="searchKashf" placeholder="بحث بالاسم" oninput="filterKashfByName()">
             </div>
             <table id="dailyTable">
                 <thead>
@@ -312,8 +309,6 @@
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-
-        <!-- تبويب المشاركة والواجبات -->
         <div id="participation" class="tabcontent">
             <div class="filter-section">
                 <button class="filter-btn" onclick="updateParticipationTable()">تصفية</button>
@@ -326,6 +321,7 @@
                 <select id="filterParticipationSection" onchange="updateParticipationTable()">
                     <option value="">جميع الفصول</option>
                 </select>
+                <button class="export-btn" onclick="exportParticipationToExcel()">تصدير إلى Excel</button>
             </div>
             <table id="participationTable">
                 <thead>
@@ -340,8 +336,6 @@
                 <tbody id="participationTableBody"></tbody>
             </table>
         </div>
-
-        <!-- تبويب جدول الإدخال -->
         <div id="inputTable" class="tabcontent">
             <div class="filter-section">
                 <button class="filter-btn" onclick="filterSavedTable()">تصفية حسب الصف</button>
@@ -369,8 +363,6 @@
                 <tbody id="savedTableBody"></tbody>
             </table>
         </div>
-
-        <!-- تبويب الإحصائيات -->
         <div id="stats" class="tabcontent">
             <div class="control-section">
                 <select id="statsGrade" onchange="updateStatsSections(); updateStatsChart()">
@@ -385,15 +377,17 @@
             </div>
             <canvas id="statsChart"></canvas>
         </div>
-
-        <!-- تبويب الكتب الدراسية -->
         <div id="books" class="tabcontent">
             <iframe id="booksIframe" src="https://ktby.net" title="الكتب الدراسية"></iframe>
         </div>
-
-        <!-- تبويب الإرسال -->
         <div id="send" class="tabcontent">
             <div class="control-section">
+                <select id="sendGrade" onchange="updateStudentList()">
+                    <option value="">اختر الصف</option>
+                    <option value="الأول متوسط">الأول متوسط</option>
+                    <option value="الثاني متوسط">الثاني متوسط</option>
+                    <option value="الثالث متوسط">الثالث متوسط</option>
+                </select>
                 <select id="sendSection" onchange="updateStudentList()">
                     <option value="">اختر الفصل</option>
                     <option value="1">1</option>
@@ -421,8 +415,6 @@
                 <button class="whatsapp-btn" onclick="sendToWhatsApp()">إرسال عبر واتساب</button>
             </div>
         </div>
-
-        <!-- تبويب الفيديو والصور -->
         <div id="media" class="tabcontent">
             <div class="control-section">
                 <input type="file" id="mediaUpload" accept="image/*,video/*" multiple style="display: none;" onchange="handleFileUpload(event)">
@@ -432,8 +424,6 @@
             </div>
             <div id="mediaContainer"></div>
         </div>
-
-        <!-- تبويب ملفات PDF -->
         <div id="pdf" class="tabcontent">
             <div class="control-section">
                 <input type="file" id="pdfUpload" accept="application/pdf" multiple style="display: none;" onchange="handlePDFUpload(event)">
@@ -443,14 +433,11 @@
             </div>
             <div id="pdfContainer"></div>
         </div>
-
-        <!-- طبقة ملء الشاشة للصور -->
         <div id="fullscreenOverlay" class="fullscreen-overlay">
             <img id="fullscreenImage" src="" alt="صورة مكبرة">
             <button class="close-btn" onclick="closeFullscreen()">إغلاق</button>
         </div>
     </div>
-
     <script>
         let students = [];
         let savedStudents = [];
@@ -474,11 +461,9 @@
             loadPDFData();
         }
 
-        // دالة فتح التبويب (مع تصحيح الأخطاء)
         function openTab(evt, tabName) {
-            console.log("Opening tab:", tabName); // تصحيح الأخطاء
+            console.log("Opening tab:", tabName);
 
-            // إخفاء جميع التبويبات
             const tabcontent = document.getElementsByClassName("tabcontent");
             if (tabcontent.length === 0) {
                 console.error("No elements with class 'tabcontent' found.");
@@ -488,7 +473,6 @@
                 tabcontent[i].style.display = "none";
             }
 
-            // إزالة الـ active من جميع أزرار التبويبات
             const tablinks = document.getElementsByClassName("tablinks");
             if (tablinks.length === 0) {
                 console.error("No elements with class 'tablinks' found.");
@@ -498,7 +482,6 @@
                 tablinks[i].classList.remove("active");
             }
 
-            // إظهار التبويب المحدد
             const targetTab = document.getElementById(tabName);
             if (targetTab) {
                 targetTab.style.display = "block";
@@ -507,7 +490,6 @@
                 return;
             }
 
-            // إضافة الـ active للزر المضغوط
             if (evt.currentTarget) {
                 evt.currentTarget.classList.add("active");
             } else {
@@ -517,7 +499,6 @@
 
             currentTab = tabName;
 
-            // تحديث المحتوى بناءً على التبويب
             try {
                 if (tabName === 'participation') {
                     updateParticipationTable();
@@ -1113,11 +1094,17 @@
         }
 
         function updateStudentList() {
+            const selectedGrade = document.getElementById('sendGrade').value;
             const selectedSection = document.getElementById('sendSection').value;
             const studentSelect = document.getElementById('sendStudent');
             studentSelect.innerHTML = '<option value="">اختر الطالب</option>';
 
-            const filteredStudents = students.filter(student => !selectedSection || student.section === selectedSection);
+            const filteredStudents = students.filter(student => {
+                const matchGrade = !selectedGrade || student.grade === selectedGrade;
+                const matchSection = !selectedSection || student.section === selectedSection;
+                return matchGrade && matchSection;
+            });
+
             filteredStudents.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
             filteredStudents.forEach(student => {
@@ -1306,7 +1293,6 @@
             document.getElementById('fullscreenOverlay').style.display = 'none';
         }
 
-        // تبويب ملفات PDF
         function handlePDFUpload(event) {
             const files = event.target.files;
             Array.from(files).forEach(file => {
@@ -1427,7 +1413,7 @@
         function setupRowDragEvents(row) {
             row.addEventListener('dragstart', (e) => {
                 row.classList.add('dragging');
-                e.dataTransfer.setData('text/plain', row.rowIndex);
+                e.dataTransfer.setData('text/plain', row.rowIndex - 1); // Store the original index of the dragged row
             });
 
             row.addEventListener('dragend', () => {
@@ -1442,9 +1428,13 @@
                 e.preventDefault();
                 const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
                 const targetIndex = Array.from(row.parentNode.children).indexOf(row);
+
                 if (draggedIndex !== targetIndex) {
+                    // Reorder the students array
                     const [draggedStudent] = students.splice(draggedIndex, 1);
                     students.splice(targetIndex, 0, draggedStudent);
+
+                    // Re-render the table and save the updated data
                     renderKashfTable();
                     saveKashfData();
                 }
@@ -1525,6 +1515,42 @@
             for (let item of pdfItems) {
                 setupPDFDragEvents(item);
             }
+        }
+
+        function filterKashfByName() {
+            const searchValue = document.getElementById('searchKashf').value.toLowerCase();
+            const rows = document.getElementById('tableBody').getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const studentName = students[i].name.toLowerCase();
+                rows[i].style.display = studentName.includes(searchValue) ? '' : 'none';
+            }
+        }
+
+        function exportParticipationToExcel() {
+            const rows = document.getElementById('participationTable').getElementsByTagName('tr');
+            const data = [];
+            const headers = ['الاسم', 'م', 'درجة المشاركة', 'و', 'درجة الواجب'];
+            data.push(headers);
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const name = row.cells[0].textContent;
+                const participationChecks = Array.from(row.cells[1].getElementsByTagName('input')).map(input => input.checked ? '✔' : '');
+                const participationScore = row.cells[2].textContent;
+                const homeworkChecks = Array.from(row.cells[3].getElementsByTagName('input')).map(input => input.checked ? '✔' : '');
+                const homeworkScore = row.cells[4].textContent;
+                data.push([name, ...participationChecks, participationScore, ...homeworkChecks, homeworkScore]);
+            }
+
+            if (data.length <= 1) {
+                alert('لا توجد بيانات لتصديرها!');
+                return;
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "المشاركة والواجبات");
+            XLSX.writeFile(wb, "المشاركة_والواجبات.xlsx");
         }
     </script>
 </body>
